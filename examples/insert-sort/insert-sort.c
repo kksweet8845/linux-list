@@ -1,12 +1,11 @@
 #include <assert.h>
 #include <stdlib.h>
-#include "list.h"
+#include "../include/list.h"
 
-#include "common.h"
+#include "../private/common.h"
 
-static uint16_t values[256];
 
-static void list_insert_sorted(struct listitem *entry, struct list_head *head)
+void list_insert_sorted(struct listitem *entry, struct list_head *head)
 {
     struct listitem *item = NULL;
 
@@ -25,7 +24,7 @@ static void list_insert_sorted(struct listitem *entry, struct list_head *head)
     list_add_tail(&entry->list, head);
 }
 
-static void list_insertsort(struct list_head *head)
+void list_insertsort(struct list_head *head)
 {
     struct list_head list_unsorted;
     struct listitem *item = NULL, *is = NULL;
@@ -39,19 +38,21 @@ static void list_insertsort(struct list_head *head)
     }
 }
 
-int main(void)
+int insert_run(int len)
 {
     struct list_head testlist;
     struct listitem *item = NULL, *is = NULL;
     size_t i;
 
-    random_shuffle_array(values, (uint16_t) ARRAY_SIZE(values));
+    static uint16_t *values;
+    values = malloc(sizeof(uint16_t) * len);
+    random_shuffle_array(values, (uint16_t) len);
 
     INIT_LIST_HEAD(&testlist);
 
     assert(list_empty(&testlist));
 
-    for (i = 0; i < ARRAY_SIZE(values); i++) {
+    for (i = 0; i < len; i++) {
         item = (struct listitem *) malloc(sizeof(*item));
         assert(item);
         item->i = values[i];
@@ -60,7 +61,7 @@ int main(void)
 
     assert(!list_empty(&testlist));
 
-    qsort(values, ARRAY_SIZE(values), sizeof(values[0]), cmpint);
+    qsort(values, len, sizeof(values[0]), cmpint);
     list_insertsort(&testlist);
 
     i = 0;
@@ -71,8 +72,8 @@ int main(void)
         i++;
     }
 
-    assert(i == ARRAY_SIZE(values));
+    assert(i == len);
     assert(list_empty(&testlist));
-
+    free(values);
     return 0;
 }
